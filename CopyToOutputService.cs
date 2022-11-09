@@ -26,13 +26,12 @@ namespace CopyToOutputSevice
         // We will return a null value when any of the following scenarios is true:
         //      - FromProject is unregistered. i.e. A -> B, A is unregistered.
         //      - ToProject is unregistered. i.e. A -> B, B is unregistered.
-        //      - ToProject is disabled. i.e. A -> B, B is disabled.
         void ICopyItemServiceReturnsNull()
         {
             var service = new ICopyItemService();
 
-            ProjectIdentity ProjectA = new ProjectIdentity("C:\Test\Path\ProjectA", new ProjectConfiguration());
-            ProjectIdentity ProjectB = new ProjectIdentity("C:\Test\Path\ProjectB", new ProjectConfiguration());
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
 
             // ProjectA is unregistered.
             Assert.Equal(null, TryGatherCopyItemsForProject(ProjectA, new Logger()));
@@ -40,10 +39,6 @@ namespace CopyToOutputSevice
             // Store ProjectA with no copy items nor referenced projects. ProjectB is unregistered.
             service.StoreCopyItemsForProject(ProjectA, true, new ImmutableArray<CopyItem>(), new ImmutableArray<ProjectIdentity>());
             Assert.Equal(null, TryGatherCopyItemsForProject(ProjectA, new Logger()));
-
-            // ProjectB is stored but disabled.
-            service.StoreCopyItemsForProject(ProjectB, false, new ImmutableArray<CopyItem>(), new ImmutableArray<ProjectIdentity>());
-            Assert.Equal(null, TryGatherCopyItemsForProject(ProjectB, new Logger()));
         }
 
         // We will return an empty IEnumerable<CopyItem> when neither FromProject nor ToProject has items to be copied.
@@ -51,8 +46,8 @@ namespace CopyToOutputSevice
         {
             var service = new ICopyItemService();
 
-            ProjectIdentity ProjectA = new ProjectIdentity("C:\Test\Path\ProjectA", new ProjectConfiguration());
-            ProjectIdentity ProjectB = new ProjectIdentity("C:\Test\Path\ProjectB", new ProjectConfiguration());
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
 
             IEnumerable<CopyItem> CopyItemsA = null;
             IEnumerable<CopyItem> CopyItemsB = null;
@@ -68,16 +63,16 @@ namespace CopyToOutputSevice
         {
             var service = new ICopyItemService();
 
-            ProjectIdentity ProjectA = new ProjectIdentity("C:\Test\Path\ProjectA", new ProjectConfiguration());
-            ProjectIdentity ProjectB = new ProjectIdentity("C:\Test\Path\ProjectB", new ProjectConfiguration());
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
 
             IEnumerable<CopyItem> CopyItemsA = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder1\file1A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2"),
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder1\file2A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder1/file1A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder1/file2A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2") };
 
             IEnumerable<CopyItem> CopyItemsB = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectB\Folder1\file1A.cs", ToPath:"C:\Test\Path\ProjectA\Folder2"),
-                new CopyItem(FromPath: "C:\Test\Path\ProjectB\Folder1\file2A.cs", ToPath:"C:\Test\Path\ProjectA\Folder2") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file1A.cs", ToPath:"C:/Test/Path/ProjectA/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file2A.cs", ToPath:"C:/Test/Path/ProjectA/Folder2") };
             
             service.StoreCopyItemsForProject(ProjectA, true, CopyItemsA, new ImmutableArray<ProjectIdentity>());
             service.StoreCopyItemsForProject(ProjectB, true, CopyItemsB, new ImmutableArray<ProjectIdentity>());
@@ -90,16 +85,16 @@ namespace CopyToOutputSevice
         {
             var service = new ICopyItemService();
 
-            ProjectIdentity ProjectA = new ProjectIdentity("C:\Test\Path\ProjectA", new ProjectConfiguration());
-            ProjectIdentity ProjectB = new ProjectIdentity("C:\Test\Path\ProjectB", new ProjectConfiguration());
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
 
             IEnumerable<CopyItem> CopyItemsA = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder1\file1A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2"),
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder1\file2A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder1/file1A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder1/file2A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2") };
 
             IEnumerable<CopyItem> CopyItemsB = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectB\Folder1\file1B.cs", ToPath:"C:\Test\Path\ProjectA\Folder2"),
-                new CopyItem(FromPath: "C:\Test\Path\ProjectB\Folder1\file2B.cs", ToPath:"C:\Test\Path\ProjectA\Folder2") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file1B.cs", ToPath:"C:/Test/Path/ProjectA/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file2B.cs", ToPath:"C:/Test/Path/ProjectA/Folder2") };
             
             IEnumerable<CopyItem> ConcatItems = CopyItemsA.Concat(CopyItemsB);
             
@@ -115,23 +110,23 @@ namespace CopyToOutputSevice
         {
             var service = new ICopyItemService();
 
-            ProjectIdentity ProjectA = new ProjectIdentity("C:\Test\Path\ProjectA", new ProjectConfiguration());
-            ProjectIdentity ProjectB = new ProjectIdentity("C:\Test\Path\ProjectB", new ProjectConfiguration());
-            ProjectIdentity ProjectC = new ProjectIdentity("C:\Test\Path\ProjectC", new ProjectConfiguration());
-            ProjectIdentity ProjectD = new ProjectIdentity("C:\Test\Path\ProjectD", new ProjectConfiguration());
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
+            ProjectIdentity ProjectC = new ProjectIdentity("C:/Test/Path/ProjectC", new ProjectConfiguration());
+            ProjectIdentity ProjectD = new ProjectIdentity("C:/Test/Path/ProjectD", new ProjectConfiguration());
 
             IEnumerable<CopyItem> CopyItemsA = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder\file1A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2"),
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder\file2A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder/file1A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder/file2A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2") };
 
             IEnumerable<CopyItem> CopyItemsB = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectB\Folder\fileB.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder/fileB.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> CopyItemsC = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectC\Folder\fileC.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectC/Folder/fileC.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> CopyItemsD = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectD\Folder\fileD.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectD/Folder/fileD.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> ConcatItems = CopyItemsA.Concat(CopyItemsB).Concat(CopyItemsC).Concat(CopyItemsD);
 
@@ -152,23 +147,23 @@ namespace CopyToOutputSevice
         {
             var service = new ICopyItemService();
 
-            ProjectIdentity ProjectA = new ProjectIdentity("C:\Test\Path\ProjectA", new ProjectConfiguration());
-            ProjectIdentity ProjectB = new ProjectIdentity("C:\Test\Path\ProjectB", new ProjectConfiguration());
-            ProjectIdentity ProjectC = new ProjectIdentity("C:\Test\Path\ProjectC", new ProjectConfiguration());
-            ProjectIdentity ProjectD = new ProjectIdentity("C:\Test\Path\ProjectD", new ProjectConfiguration());
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
+            ProjectIdentity ProjectC = new ProjectIdentity("C:/Test/Path/ProjectC", new ProjectConfiguration());
+            ProjectIdentity ProjectD = new ProjectIdentity("C:/Test/Path/ProjectD", new ProjectConfiguration());
 
             IEnumerable<CopyItem> CopyItemsA = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder\file1A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2"),
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder\file2A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder/file1A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder/file2A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2") };
 
             IEnumerable<CopyItem> CopyItemsB = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectB\Folder\fileB.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder/fileB.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> CopyItemsC = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectC\Folder\fileC.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectC/Folder/fileC.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> CopyItemsD = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectD\Folder\fileD.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectD/Folder/fileD.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> ConcatItemsA = CopyItemsA.Concat(CopyItemsB).Concat(CopyItemsC).Concat(CopyItemsD);
 
@@ -191,23 +186,23 @@ namespace CopyToOutputSevice
         {
             var service = new ICopyItemService();
 
-            ProjectIdentity ProjectA = new ProjectIdentity("C:\Test\Path\ProjectA", new ProjectConfiguration());
-            ProjectIdentity ProjectB = new ProjectIdentity("C:\Test\Path\ProjectB", new ProjectConfiguration());
-            ProjectIdentity ProjectC = new ProjectIdentity("C:\Test\Path\ProjectC", new ProjectConfiguration());
-            ProjectIdentity ProjectD = new ProjectIdentity("C:\Test\Path\ProjectD", new ProjectConfiguration());
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
+            ProjectIdentity ProjectC = new ProjectIdentity("C:/Test/Path/ProjectC", new ProjectConfiguration());
+            ProjectIdentity ProjectD = new ProjectIdentity("C:/Test/Path/ProjectD", new ProjectConfiguration());
 
             IEnumerable<CopyItem> CopyItemsA = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder\file1A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2"),
-                new CopyItem(FromPath: "C:\Test\Path\ProjectA\Folder\file2A.cs", ToPath:"C:\Test\Path\ProjectB\Folder2") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder/file1A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder/file2A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2") };
 
             IEnumerable<CopyItem> CopyItemsB = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectB\Folder\fileB.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder/fileB.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> CopyItemsC = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectC\Folder\fileC.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectC/Folder/fileC.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> CopyItemsD = new []{ 
-                new CopyItem(FromPath: "C:\Test\Path\ProjectD\Folder\fileD.cs", ToPath:"C:\Test\Path\ProjectA\Folder") };
+                new CopyItem(FromPath: "C:/Test/Path/ProjectD/Folder/fileD.cs", ToPath:"C:/Test/Path/ProjectA/Folder") };
 
             IEnumerable<CopyItem> ConcatItemsA = CopyItemsA.Concat(CopyItemsB).Concat(CopyItemsC).Concat(CopyItemsD);
 
