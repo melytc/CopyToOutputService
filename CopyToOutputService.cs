@@ -3,12 +3,39 @@ namespace CopyToOutputSevice
     internal interface ICopyItemService
     {
         // Storing data
-
         void StoreCopyItemsForProject(ProjectIdentity id, bool isEnabled, ImmutableArray<CopyItem> items, ImmutableArray<ProjectIdentity> referencedProjects);
 
         // Querying data
+        (bool, IEnumerable<CopyItem>?)? TryGatherCopyItemsForProject(ProjectIdentity projectId, Logger logger)
+        {
+            Queue<ProjectIdentity> queue = new Queue<ProjectIdentity>();
+            HashSet<CopyItem> copyItemsSet = new HashSet<CopyItem>();
+            bool isComplete = true;
 
-        IEnumerable<CopyItem>? TryGatherCopyItemsForProject(ProjectIdentity id, Logger logger);
+            queue.Enqueue(projectId);
+
+            while (queue.Count != 0)
+            {
+                ProjectIdentity current = queue.Dequeue();
+
+                if (current.IsEnabled)
+                {
+                    copyItemsSet.Add(storedItems(current)); // Add the CopyItems for that project, that we have stored in our service (?).
+                }
+                else
+                {
+                    // We'll set our boolean to false, as we might had to skip some CopyItems.
+                    isComplete = false;
+                }
+
+                foreach (ProjectIdentity project in current.References)
+                    queue.Enqueue(project);
+            }
+
+            return (isComplete, copyItemsSet);
+        }
+
+        IEnumerable<ProjectIdentity> TryGetProjectReferences(ProjectIdentity projectId, Logger logger);
     }
 
     // Identifies a configured project
@@ -16,7 +43,7 @@ namespace CopyToOutputSevice
 
     class CopyItem
     {
-        // absolute paths
+        // Absolute paths
         string FromPath {get;}
         string ToPath {get;}
     }
@@ -55,8 +82,29 @@ namespace CopyToOutputSevice
             service.StoreCopyItemsForProject(ProjectA, true, CopyItemsA, new ImmutableArray<ProjectIdentity>(){ ProjectB });
             service.StoreCopyItemsForProject(ProjectB, true, CopyItemsB, new ImmutableArray<ProjectIdentity>(){ ProjectA });
 
-            Assert.Equal(IEnumerable.Empty<CopyItem>, TryGatherCopyItemsForProject(ProjectA, new Logger()));
-            Assert.Equal(IEnumerable.Empty<CopyItem>, TryGatherCopyItemsForProject(ProjectB, new Logger()));
+            Assert.Equal((true, IEnumerable.Empty<CopyItem>), TryGatherCopyItemsForProject(ProjectA, new Logger()));
+            Assert.Equal((true, IEnumerable.Empty<CopyItem>), TryGatherCopyItemsForProject(ProjectB, new Logger()));
+        }
+
+        void ICopyItemServiceReturnsItemsWhenIncomplete()
+        {
+            var service = new ICopyItemService();
+
+            ProjectIdentity ProjectA = new ProjectIdentity("C:/Test/Path/ProjectA", new ProjectConfiguration());
+            ProjectIdentity ProjectB = new ProjectIdentity("C:/Test/Path/ProjectB", new ProjectConfiguration());
+
+            IEnumerable<CopyItem> CopyItemsA = new []{
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder1/file1A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectA/Folder1/file2A.cs", ToPath:"C:/Test/Path/ProjectB/Folder2") };
+
+            IEnumerable<CopyItem> CopyItemsB = new []{
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file1A.cs", ToPath:"C:/Test/Path/ProjectA/Folder2"),
+                new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file2A.cs", ToPath:"C:/Test/Path/ProjectA/Folder2") };
+
+            service.StoreCopyItemsForProject(ProjectA, true, CopyItemsA, new ImmutableArray<ProjectIdentity>(){ ProjectB });
+            service.StoreCopyItemsForProject(ProjectB, false, CopyItemsB, new ImmutableArray<ProjectIdentity>());
+
+            Assert.Equal((false, CopyItemsA), TryGatherCopyItemsForProject(ProjectA, new Logger()));
         }
 
         void ICopyItemServiceReturnsItemsWhenTheyExist()
@@ -74,6 +122,8 @@ namespace CopyToOutputSevice
                 new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file1A.cs", ToPath:"C:/Test/Path/ProjectA/Folder2"),
                 new CopyItem(FromPath: "C:/Test/Path/ProjectB/Folder1/file2A.cs", ToPath:"C:/Test/Path/ProjectA/Folder2") };
             
+            // A
+            // B
             service.StoreCopyItemsForProject(ProjectA, true, CopyItemsA, new ImmutableArray<ProjectIdentity>());
             service.StoreCopyItemsForProject(ProjectB, true, CopyItemsB, new ImmutableArray<ProjectIdentity>());
 
@@ -219,6 +269,7 @@ namespace CopyToOutputSevice
             Assert.Equal(CopyItemsC, TryGatherCopyItemsForProject(ProjectC, new Logger()));
             Assert.Equal(CopyItemsD, TryGatherCopyItemsForProject(ProjectD, new Logger()));
         }
+
     }
 
 }
